@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+	match /databases/{database}/documents {
+		function signedIn() {
+			return request.auth != null;
+		}
+
+		function isAdmin() {
+			return signedIn()
+				&& exists(/databases/$(database)/documents/users/$(request.auth.uid))
+				&& get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin';
+		}
+
+		function isManager() {
+			return signedIn()
+				&& exists(/databases/$(database)/documents/users/$(request.auth.uid))
+				&& get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'manager';
+		}
+
+		match /users/{userId} {
+			allow read: if signedIn() && request.auth.uid == userId;
+			allow create: if signedIn()
+				&& request.auth.uid == userId
+				&& !request.resource.data.keys().hasAny(['role']);
+			allow update: if signedIn()
+				&& request.auth.uid == userId
+				&& request.resource.data.get('role', null) == resource.data.get('role', null);
+			allow delete: if false;
+		}
+
+		match /restaurants/{restaurantId}/tables/{tableId} {
+			allow read: if isAdmin() || isManager();
+			allow write: if isManager();
+		}
+
+		match /restaurants/{restaurantId}/foods/{foodId} {
+			allow read: if isAdmin() || isManager();
+			allow write: if isAdmin() || isManager();
+		}
+
+		match /restaurants/{restaurantId}/foodCategories/{categoryId} {
+			allow read: if isAdmin() || isManager();
+			allow write: if isAdmin() || isManager();
+		}
+
+		match /restaurants/{restaurantId}/requests/{requestId} {
+			allow read: if isAdmin() || isManager();
+			allow delete: if isAdmin();
+			allow create: if isAdmin()
+				&& request.resource.data.keys().hasOnly([
+					'description', 'status', 'createdBy', 'createdAt', 'type',
+					'tables', 'requesterUid', 'requesterName', 'food'
+				])
+				&& request.resource.data.description is string
+				&& request.resource.data.description.size() > 0
+				&& request.resource.data.description.size() <= 200
+				&& request.resource.data.createdBy == request.auth.uid
+				&& request.resource.data.createdAt == request.time
+				&& (
+					(request.resource.data.status == 'open'
+						&& !request.resource.data.keys().hasAny(['type', 'tables', 'requesterUid', 'requesterName', 'food']))
+					|| (request.resource.data.status == 'pending-manager'
+						&& request.resource.data.type == 'table-layout'
+						&& request.resource.data.tables is list
+						&& request.resource.data.tables.size() <= 200
+						&& request.resource.data.requesterUid == request.auth.uid
+						&& request.resource.data.requesterName is string
+						&& !request.resource.data.keys().hasAny(['food']))
+					|| (request.resource.data.status == 'pending-manager'
+						&& request.resource.data.type == 'food-create'
+						&& request.resource.data.food is map
+						&& request.resource.data.food.keys().hasOnly(['FoodId', 'FoodName', 'FoodDetail', 'FoodQuantity', 'FoodPrice', 'FoodCategory', 'FoodImageUrl'])
+						&& request.resource.data.food.keys().hasAll(['FoodId', 'FoodName', 'FoodDetail', 'FoodQuantity', 'FoodPrice', 'FoodCategory'])
+						&& request.resource.data.food.FoodId is int
+						&& request.resource.data.food.FoodId > 0
+						&& request.resource.data.food.FoodName is string
+						&& request.resource.data.food.FoodName.size() > 0
+						&& request.resource.data.food.FoodName.size() <= 80
+						&& request.resource.data.food.FoodDetail is string
+						&& request.resource.data.food.FoodDetail.size() > 0
+						&& request.resource.data.food.FoodDetail.size() <= 240
+						&& request.resource.data.food.FoodQuantity is int
+						&& request.resource.data.food.FoodQuantity >= 0
+						&& request.resource.data.food.FoodPrice is number
+						&& request.resource.data.food.FoodPrice >= 0
+						&& request.resource.data.food.FoodCategory is string
+						&& request.resource.data.food.FoodCategory.size() > 0
+						&& request.resource.data.requesterUid == request.auth.uid
+						&& request.resource.data.requesterName is string
+						&& !request.resource.data.keys().hasAny(['tables']))
+					|| (request.resource.data.status == 'pending-manager'
+						&& request.resource.data.type == 'food-delete'
+						&& request.resource.data.food is map
+						&& request.resource.data.food.keys().hasOnly(['FoodId', 'FoodName'])
+						&& request.resource.data.food.FoodId is int
+						&& request.resource.data.food.FoodId > 0
+						&& request.resource.data.food.FoodName is string
+						&& request.resource.data.requesterUid == request.auth.uid
+						&& request.resource.data.requesterName is string
+						&& !request.resource.data.keys().hasAny(['tables']))
+				);
+			allow update: if (isAdmin()
+					&& !resource.data.keys().hasAny(['type'])
+					&& request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+					&& request.resource.data.status in ['open', 'in-progress', 'done']
+					&& request.resource.data.updatedAt == request.time)
+				|| (isManager()
+					&& resource.data.type in ['table-layout', 'food-create', 'food-delete']
+					&& resource.data.status == 'pending-manager'
+					&& request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewedBy', 'reviewedAt'])
+					&& request.resource.data.status in ['approved', 'rejected']
+					&& request.resource.data.reviewedBy == request.auth.uid
+					&& request.resource.data.reviewedAt == request.time);
+		}
+	}
+}

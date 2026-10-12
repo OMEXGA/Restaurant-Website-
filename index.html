@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#efe2d3">
+		<title>Login</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="styles/style.css">
+	</head>
+	<body>
+		<main class="login-page">
+			<section class="login-panel" aria-labelledby="login-title">
+				<h1 id="login-title">Login</h1>
+				<form id="login-form">
+					<div class="form-field">
+						<input id="email" name="email" type="email" placeholder="Email" autocomplete="email" required>
+						<label for="email">Email</label>
+					</div>
+
+					<div class="form-field">
+						<input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password" required>
+						<label for="password">Password</label>
+					</div>
+
+					<button type="submit">Enter</button>
+				</form>
+				<p class="form-message" id="login-message" role="alert" aria-live="polite"></p>
+			</section>
+		</main>
+		<script type="module" src="scripts/login.js"></script>
+	</body>
+</html>

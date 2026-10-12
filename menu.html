@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#f7f2eb">
+		<title>Menu</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="styles/style.css">
+	</head>
+	<body>
+		<div class="menu-page">
+			<aside class="menu-sidebar" id="menu-sidebar">
+				<a class="menu-brand" href="menu.html" aria-label="Restaurant home">
+					<span class="brand-mark" aria-hidden="true">R</span>
+					<span>Restaurant<span class="brand-subtitle">OPERATIONS</span></span>
+				</a>
+
+				<div class="account-summary">
+					<span class="account-avatar" id="account-avatar" aria-hidden="true">R</span>
+					<span class="account-copy"><strong id="account-name">Loading account...</strong><span id="account-role">Administrator</span></span>
+				</div>
+
+				<p class="nav-heading">WORKSPACE</p>
+				<nav class="menu-nav" aria-label="Workspace">
+					<button class="nav-link is-active" type="button" data-view="notifications" aria-current="page"><span class="nav-indicator"></span>Notifications</button>
+					<button class="nav-link" type="button" data-view="tables"><span class="nav-indicator"></span>Table management</button>
+					<button class="nav-link" type="button" data-view="food"><span class="nav-indicator"></span>Food management</button>
+					<button class="nav-link" type="button" data-view="requests"><span class="nav-indicator"></span>Requests</button>
+				</nav>
+
+				<div class="sidebar-footer">
+					<p id="storage-note">Changes are shared through Firebase.</p>
+					<button class="sign-out-button" id="sign-out" type="button">Sign out</button>
+				</div>
+			</aside>
+			<button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Close navigation" hidden></button>
+
+			<main class="menu-main">
+				<header class="workspace-topbar">
+					<button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="menu-sidebar">Menu</button>
+					<p><span>Workspace</span><span class="crumb-divider">/</span><strong id="current-section">Notifications</strong></p>
+					<span class="workspace-status"><span></span>Workspace active</span>
+				</header>
+
+				<div class="workspace-content">
+					<p id="menu-message" class="menu-message" role="status" aria-live="polite"></p>
+					<section class="workspace-view is-visible" id="view-notifications" data-panel="notifications" aria-labelledby="notifications-title">
+						<div class="view-heading">
+							<div><p class="eyebrow">YOUR ACCOUNT</p><h1 id="notifications-title">Notifications</h1><p class="view-description">A concise record of your account activity.</p></div>
+						</div>
+						<article class="activity-row">
+							<span class="activity-icon" aria-hidden="true">✓</span>
+							<div class="activity-copy"><div class="activity-title-line"><h2>Current session</h2><span class="activity-badge">ACTIVE</span></div><p>You are signed in as <strong id="session-email">...</strong>.</p><time id="session-time"></time></div>
+						</article>
+						<p class="privacy-note">Only this active session is shown here. No location or IP address is collected.</p>
+					</section>
+
+					<section class="workspace-view" id="view-tables" data-panel="tables" aria-labelledby="tables-title" hidden>
+						<div class="view-heading"><div><p class="eyebrow">FLOOR PLAN</p><h1 id="tables-title">Table management</h1><p class="view-description" id="tables-description">Arrange tables, then request manager approval to publish the finished layout.</p></div><div class="floorplan-actions"><button class="secondary-action" id="add-table" type="button">Add table</button><button class="primary-action" id="request-layout-save" type="button" disabled>Request to save</button></div></div>
+						<aside class="layout-preview-banner" id="layout-preview-banner" role="status" hidden><div><strong id="layout-preview-title">Proposed layout preview</strong><span id="layout-preview-detail">This layout is not live yet.</span></div><button id="exit-layout-preview" type="button">Back to live layout</button></aside>
+						<div class="floorplan-toolbar"><span class="item-count" id="table-count">0 tables</span><div class="floorplan-legend"><span><i class="legend-dot is-available"></i>Available</span><span><i class="legend-dot is-occupied"></i>Occupied</span><span><i class="legend-dot is-reserved"></i>Reserved</span></div><span class="drag-hint">Drag a table to move it</span></div>
+						<div class="floorplan-stage">
+							<div class="floorplan-canvas" id="floorplan-canvas" aria-label="Restaurant floor plan">
+								<div class="room-boundary" aria-hidden="true"><span>DINING ROOM</span></div>
+								<div class="table-layer" id="table-layer"></div>
+							</div>
+							<aside class="table-inspector" id="table-inspector" aria-label="Selected table details" hidden>
+								<div class="inspector-heading" id="inspector-drag-handle"><div><p class="eyebrow">TABLE DETAILS</p><h2 id="inspector-table-name">Table</h2></div><button class="inspector-close" id="close-inspector" type="button" aria-label="Close table details">×</button></div>
+								<label class="inspector-field">Capacity<input id="inspector-capacity" type="number" min="1" max="30"></label>
+								<label class="inspector-field">Status<select id="inspector-status"><option>Available</option><option>Occupied</option><option>Reserved</option></select></label>
+								<label class="inspector-field rotation-field"><span>Rotation <output id="inspector-rotation-value" for="inspector-rotation">0°</output></span><input id="inspector-rotation" type="range" min="0" max="345" step="15" value="0"></label>
+								<div class="inspector-actions"><button class="primary-action" id="save-table" type="button">Save changes</button><button class="remove-button" id="delete-table" type="button">Delete table</button></div>
+							</aside>
+						</div>
+						<p class="empty-state floorplan-empty" id="table-empty" hidden>No tables yet. Add the first table to set up the floor.</p>
+					</section>
+
+					<section class="workspace-view" id="view-food" data-panel="food" aria-labelledby="food-title" hidden>
+						<div class="view-heading"><div><p class="eyebrow">MENU CATALOG</p><h1 id="food-title">Food management</h1><p class="view-description" id="food-description">Add menu items and keep prices up to date.</p></div><div class="food-heading-actions"><span class="item-count" id="food-count">0 items</span></div></div>
+						<form class="entry-form food-form" id="food-form">
+							<label class="field-id">Food ID<input name="FoodId" type="number" min="1" step="1" placeholder="e.g. 101" required></label>
+							<label class="field-name">Food name<input name="FoodName" placeholder="e.g. Grilled steak" maxlength="80" required></label>
+							<div class="category-field field-category">
+								<div class="category-label-row">
+									<label for="food-category">Category</label>
+									<button class="category-toggle-link" id="show-category-form" type="button">+ New</button>
+								</div>
+								<select id="food-category" name="FoodCategory" required>
+									<option value="">Select category</option>
+								</select>
+							</div>
+							<label class="field-qty">Quantity<input name="FoodQuantity" type="number" min="0" step="1" placeholder="0" required></label>
+							<label class="field-price">Price ($)<input name="FoodPrice" type="number" min="0" step="0.01" placeholder="0.00" required></label>
+							<label class="field-detail">Food detail<input name="FoodDetail" placeholder="Describe ingredients or serving" maxlength="240" required></label>
+							<div class="food-image-field field-photo">
+								<label for="food-image">Photo <span class="photo-optional">(optional)</span></label>
+								<input id="food-image" name="FoodImage" type="file" accept="image/*">
+							</div>
+							<div class="food-form-actions">
+								<button class="primary-action" type="submit">Request food</button>
+							</div>
+						</form>
+						<form class="entry-form category-form" id="category-form" hidden><label>New category name<input name="categoryName" placeholder="e.g. Desserts" maxlength="40" required></label><button type="submit">Save category</button></form>
+						<div class="list-heading food-list-heading"><span>IMAGE</span><span>ID</span><span>FOOD</span><span>CATEGORY</span><span>DETAIL</span><span>QTY</span><span>PRICE</span><span class="visually-hidden">ACTIONS</span></div>
+						<div class="managed-list" id="food-list"></div>
+						<p class="empty-state" id="food-empty">No menu items yet. Add an item above.</p>
+					</section>
+
+					<section class="workspace-view" id="view-requests" data-panel="requests" aria-labelledby="requests-title" hidden>
+						<div class="view-heading"><div><p class="eyebrow" id="requests-kicker">ADMIN WORKSPACE</p><h1 id="requests-title">Requests</h1><p class="view-description" id="requests-description">Track saved requests and table layouts awaiting manager review.</p></div><span class="item-count" id="request-count">0 open</span></div>
+						<form class="entry-form request-form" id="request-form"><label>Request<input name="description" placeholder="What needs attention?" maxlength="120" required></label><button type="submit">Add request</button></form>
+						<div class="request-list" id="request-list"></div>
+						<p class="empty-state" id="request-empty">No requests yet. Add one above.</p>
+					</section>
+				</div>
+			</main>
+		</div>
+		<script type="module" src="scripts/menu.js"></script>
+	</body>
+</html>
