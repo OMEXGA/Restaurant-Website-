@@ -211,7 +211,10 @@ function setView(name) {
 		view.classList.toggle("is-visible", active);
 	}
 
-	sectionName.textContent = navButtons.find((button) => button.dataset.view === name)?.textContent.trim() ?? "Workspace";
+	const selectedButton = navButtons.find((button) => button.dataset.view === name);
+	const title = selectedButton?.textContent.trim() ?? "Notifications";
+	sectionName.textContent = title;
+	document.title = title;
 	sidebar.classList.remove("is-open");
 	mobileMenuToggle.setAttribute("aria-expanded", "false");
 	sidebarBackdrop.hidden = true;
@@ -226,6 +229,11 @@ function createTextElement(tag, className, text) {
 
 for (const button of navButtons) {
 	button.addEventListener("click", () => setView(button.dataset.view));
+}
+
+const initialActiveNav = navButtons.find((button) => button.classList.contains("is-active"));
+if (initialActiveNav) {
+	document.title = initialActiveNav.textContent.trim();
 }
 
 mobileMenuToggle.addEventListener("click", () => {
